@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Para ti ❤️</title>
+
 <style>
 body{
     margin:0;
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #ff4e8a, #ff8fab);
     color:white;
     display:flex;
@@ -18,33 +19,18 @@ body{
     overflow:hidden;
 }
 
-.container{
-    background: rgba(255,255,255,0.15);
-    padding:40px;
-    border-radius:20px;
-    backdrop-filter: blur(10px);
-    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+.screen{
+    max-width:400px;
 }
 
 button{
-    padding:15px 30px;
-    margin:10px;
+    padding:12px 25px;
+    margin-top:20px;
     border:none;
-    border-radius:30px;
-    font-size:18px;
+    border-radius:25px;
+    font-size:16px;
     cursor:pointer;
     transition:0.3s;
-}
-
-.yes{
-    background:#fff;
-    color:#ff4e8a;
-}
-
-.no{
-    background:#ff2e63;
-    color:white;
-    position:absolute;
 }
 
 button:hover{
@@ -55,7 +41,65 @@ button:hover{
     display:none;
 }
 
-.hearts{
+/* CARTA */
+.envelope{
+    width:300px;
+    height:200px;
+    background:#fff;
+    position:relative;
+    cursor:pointer;
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    margin:auto;
+}
+
+.flap{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:#ff4e8a;
+    clip-path: polygon(0 0, 100% 0, 50% 60%);
+    transition: transform 1s ease;
+    transform-origin: top;
+}
+
+.open .flap{
+    transform: rotateX(180deg);
+}
+
+.letter{
+    position:absolute;
+    width:90%;
+    height:90%;
+    background:white;
+    color:#333;
+    top:5%;
+    left:5%;
+    border-radius:10px;
+    padding:20px;
+    box-sizing:border-box;
+    opacity:0;
+    transition: opacity 1s ease 0.5s;
+    overflow:auto;
+}
+
+.open .letter{
+    opacity:1;
+}
+
+/* PREGUNTA */
+.yes{
+    background:white;
+    color:#ff4e8a;
+}
+
+.no{
+    background:#ff2e63;
+    color:white;
+    position:absolute;
+}
+
+canvas{
     position:fixed;
     top:0;
     left:0;
@@ -67,32 +111,68 @@ button:hover{
 </head>
 <body>
 
-<div class="container" id="main">
-    <h1>💌 Hola...</h1>
-    <p>Tengo algo muy importante que preguntarte ❤️</p>
-    <button onclick="showQuestion()">Descubrir</button>
+<!-- PANTALLA INICIAL CON SPOTIFY -->
+<div id="musicScreen" class="screen">
+    <h2>Antes de continuar... 🎵</h2>
+    <p>Presiona play y deja que la canción empiece 💖</p>
+
+    <iframe style="border-radius:12px" 
+    src="https://open.spotify.com/embed/track/30brAfx64jxQMeUNUgDFaj?utm_source=generator" 
+    width="100%" height="100" frameBorder="0" 
+    allowfullscreen="" 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+    loading="lazy"></iframe>
+
+    <button onclick="showLetter()">Ya empezó la canción 💕</button>
 </div>
 
-<div class="container hidden" id="question">
-    <h1>✨ Este 14 de febrero ✨</h1>
-    <p>¿Quieres ser mi San Valentín? 💖</p>
+<!-- CARTA -->
+<div id="letterScreen" class="hidden">
+    <div class="envelope" id="envelope" onclick="openLetter()">
+        <div class="flap"></div>
+        <div class="letter">
+            <h3>Para ti, Ivonne ❤️</h3>
+            <p>
+            Desde que llegaste a mi vida todo cambió...
+            Cada risa contigo significa algo especial.
+            Este 14 de febrero quiero preguntarte algo
+            que nace directamente del corazón...
+            </p>
+            <button onclick="showQuestion()">Continuar</button>
+        </div>
+    </div>
+</div>
+
+<!-- PREGUNTA -->
+<div id="question" class="hidden">
+    <h1>¿Quieres ser mi San Valentín? 💖</h1>
     <button class="yes" onclick="sayYes()">Sí 💕</button>
     <button class="no" id="noBtn">No 😢</button>
 </div>
 
-<canvas class="hearts" id="hearts"></canvas>
+<canvas id="hearts"></canvas>
 
 <script>
+
+function showLetter(){
+    document.getElementById("musicScreen").classList.add("hidden");
+    document.getElementById("letterScreen").classList.remove("hidden");
+}
+
+function openLetter(){
+    document.getElementById("envelope").classList.add("open");
+}
+
 function showQuestion(){
-    document.getElementById("main").classList.add("hidden");
+    document.getElementById("letterScreen").classList.add("hidden");
     document.getElementById("question").classList.remove("hidden");
 }
 
 function sayYes(){
-    alert("Sabía que dirías que sí 😍💖");
     startHearts();
 }
 
+/* BOTÓN QUE HUYE */
 const noBtn = document.getElementById("noBtn");
 
 noBtn.addEventListener("mouseover", () => {
@@ -102,40 +182,73 @@ noBtn.addEventListener("mouseover", () => {
     noBtn.style.top = y + "px";
 });
 
+/* CORAZONES */
 const canvas = document.getElementById("hearts");
 const ctx = canvas.getContext("2d");
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let hearts = [];
 
+function randomColor(){
+    const colors = ["#ff4e8a", "#ff2e63", "#ffffff", "#ff99c8"];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
 function startHearts(){
     setInterval(()=>{
         hearts.push({
             x: Math.random()*canvas.width,
-            y: -10,
-            size: Math.random()*20+10,
-            speed: Math.random()*3+1
+            y: -20,
+            size: Math.random()*15+15,
+            speed: Math.random()*1.5+0.5,
+            sway: Math.random()*2,
+            angle: Math.random()*360,
+            rotationSpeed: (Math.random()-0.5)*0.1,
+            color: randomColor()
         });
-    },300);
+    },200);
 
     animate();
 }
 
+function drawHeart(x, y, size, angle, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.scale(size/20, size/20);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-10, -10, -20, 10, 0, 20);
+    ctx.bezierCurveTo(20, 10, 10, -10, 0, 0);
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 15;
+    ctx.fill();
+
+    ctx.restore();
+}
+
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
+
     hearts.forEach((heart,index)=>{
-        ctx.fillStyle="pink";
-        ctx.beginPath();
-        ctx.arc(heart.x, heart.y, heart.size/2, 0, Math.PI*2);
-        ctx.fill();
         heart.y += heart.speed;
-        if(heart.y > canvas.height){
+        heart.x += Math.sin(heart.y * 0.01) * heart.sway;
+        heart.angle += heart.rotationSpeed;
+
+        drawHeart(heart.x, heart.y, heart.size, heart.angle, heart.color);
+
+        if(heart.y > canvas.height + 50){
             hearts.splice(index,1);
         }
     });
+
     requestAnimationFrame(animate);
 }
+
 </script>
 
 </body>
